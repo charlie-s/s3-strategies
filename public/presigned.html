@@ -1,0 +1,74 @@
+<html>
+<head>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    const state = { file: null, presigned: null }
+
+    /**
+     * Generate a "presigned-post" file upload request.
+     */
+    async function createPresigned () {
+      state.file = document.getElementById('file')?.files[0]
+      if (!state.file) return alert('No file!')
+
+      const presignedFetch = await fetch(`/api/presigned?filename=${state.file.name}`)
+      state.presigned = await presignedFetch.json()
+
+      // Show result.
+      document.getElementById('presignedResult').innerHTML = JSON.stringify(state.presigned, null, 2)
+    }
+
+    /**
+     * Upload a file with the presigned request.
+     */
+    async function uploadFile () {
+      if (!state.presigned) return alert('No presigned!')
+
+      // Using "presigned" requires the content-type to be "multipart/form-data".
+      const formData = new FormData()
+      for (const prop in state.presigned.fields) {
+        formData.append(prop, state.presigned.fields[prop])
+      }
+      formData.append('file', state.file, state.file.name)
+
+      // Upload file to S3.
+      await fetch(state.presigned.url, { method: 'post', body: formData })
+
+      // Show result.
+      document.getElementById('s3Result').innerHTML = `${state.presigned.url}${state.presigned.fields.key}`
+    }
+  </script>
+</head>
+<body>
+  <div class="flex flex-col h-full justify-center items-center">
+    <div class="flex flex-col gap-20 w-[40rem]">
+      <div class="flex flex-col gap-4">
+        <div class="text-stone-400">1) Select File</div>
+        <input id="file" class="w-80 border bg-slate-100 p-2" type="file" />
+      </div>
+      <div class="flex flex-col gap-4">
+        <button onclick="createPresigned()" class="w-fit px-4 py-2 bg-emerald-700 text-white rounded hover:bg-emerald-800 shadow-lg">
+          2) Create Presigned Request
+        </button>
+        <code class="p-2 bg-emerald-100 flex flex-col gap-2 text-left ">
+          <div class="font-bold">
+            Presigned Request:
+          </div>
+          <pre id="presignedResult" class="text-emerald-600 text-xs overflow-auto"></pre>
+        </code>
+      </div>
+      <div class="flex flex-col gap-4">
+        <button onclick="uploadFile()" class="w-fit px-4 py-2 bg-emerald-700 text-white rounded hover:bg-emerald-800 shadow-lg">
+          3) Upload File
+        </button>
+        <code class="p-2 bg-emerald-100 flex flex-col gap-2 text-left ">
+          <div class="font-bold">
+            S3 PUT Result:
+          </div>
+          <pre id="s3Result" class="text-emerald-600 text-xs overflow-auto"></pre>
+        </code>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

@@ -1,0 +1,51 @@
+<html>
+<head>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    /**
+     * Upload a file with the presigned request.
+     */
+    async function uploadFile () {
+      const file = document.getElementById('file')?.files[0]
+      if (!file) return alert('No file!')
+
+      const reader = new FileReader()
+      reader.readAsDataURL(file)
+      reader.onload = async () => {
+        const res = await fetch('/api/base64', {
+          method: 'post',
+          headers: { 'content-type': 'application/json' },
+          body: JSON.stringify({
+            filename: file.name,
+            data: reader.result
+          })
+        })
+
+        const data = await res.json()
+        document.getElementById('result').innerHTML = JSON.stringify(data, null, 2)
+      }
+    }
+  </script>
+</head>
+<body>
+  <div class="flex flex-col h-full justify-center items-center">
+    <div class="flex flex-col gap-20 w-[40rem]">
+      <div class="flex flex-col gap-4">
+        <div class="text-stone-400">1) Select File</div>
+        <input id="file" class="w-80 border bg-slate-100 p-2" type="file" />
+      </div>
+      <div class="flex flex-col gap-4">
+        <button onclick="uploadFile()" class="w-fit px-4 py-2 bg-emerald-700 text-white rounded hover:bg-emerald-800 shadow-lg">
+          2) Upload File
+        </button>
+        <code class="p-2 bg-emerald-100 flex flex-col gap-2 text-left ">
+          <div class="font-bold">
+            Result:
+          </div>
+          <pre id="result" class="text-emerald-600 text-xs overflow-auto"></pre>
+        </code>
+      </div>
+    </div>
+  </div>
+</body>
+</html>
