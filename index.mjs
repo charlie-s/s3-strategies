@@ -10,7 +10,7 @@ const app = express()
 app.use(express.static('node_modules'))
 app.use(express.static('public'))
 
-// Other routes.
+// Processing routes.
 globSync('routes/**.mjs').forEach(async route => {
   app.use('/api', (await import(`./${route}`)).default)
 })

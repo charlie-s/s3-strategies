@@ -8,6 +8,7 @@
      * Generate a "presigned-post" file upload request.
      */
     async function createPresigned () {
+      const performanceStart = performance.now()
       state.file = document.getElementById('file')?.files[0]
       if (!state.file) return alert('No file!')
 
@@ -16,12 +17,14 @@
 
       // Show result.
       document.getElementById('presignedResult').innerHTML = JSON.stringify(state.presigned, null, 2)
+      console.log(`Total time: ${(performance.now() - performanceStart) / 1000}`)
     }
 
     /**
      * Upload a file with the presigned request.
      */
     async function uploadFile () {
+      const performanceStart = performance.now()
       if (!state.presigned) return alert('No presigned!')
 
       // Using "presigned" requires the content-type to be "multipart/form-data".
@@ -36,6 +39,7 @@
 
       // Show result.
       document.getElementById('s3Result').innerHTML = `${state.presigned.url}${state.presigned.fields.key}`
+      console.log(`Total time: ${(performance.now() - performanceStart) / 1000}`)
     }
   </script>
 </head>

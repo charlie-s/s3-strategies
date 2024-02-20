@@ -1,10 +1,11 @@
 import { createPresignedPost } from '@aws-sdk/s3-presigned-post'
 import express from 'express'
+import mime from 'mime'
 import s3client from '../s3client.mjs'
 
 // Define file extensions that are allowed. Alternatively, you could have a
 // list of mime types.
-const ALLOWED_EXTENSIONS = ['jpg', 'png']
+const ALLOWED_EXTENSIONS = ['jpg', 'jpeg', 'png']
 
 // Define max allowed file size.
 const MAX_BYTES = 8 * 1024 * 1024
@@ -21,7 +22,7 @@ router.get('/presigned', async (req, res) => {
   }
 
   // Generate a "presigned" request for the given filename.
-  const presigned = await createPresignedPost(client, {
+  const presigned = await createPresignedPost(s3client, {
     Bucket: process.env.BUCKET,
     Key: `${process.env.PREFIX}${filename}`,
     Conditions: [['content-length-range', 100, MAX_BYTES]],

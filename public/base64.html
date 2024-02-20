@@ -6,6 +6,8 @@
      * Upload a file with the presigned request.
      */
     async function uploadFile () {
+      const performanceStart = performance.now()
+
       const file = document.getElementById('file')?.files[0]
       if (!file) return alert('No file!')
 
@@ -22,7 +24,9 @@
         })
 
         const data = await res.json()
+
         document.getElementById('result').innerHTML = JSON.stringify(data, null, 2)
+        console.log(`Total time: ${(performance.now() - performanceStart) / 1000}`)
       }
     }
   </script>
